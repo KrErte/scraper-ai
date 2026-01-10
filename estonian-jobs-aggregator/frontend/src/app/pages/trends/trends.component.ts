@@ -229,10 +229,8 @@ import { SkillStats, SalaryStats } from '../../models/stats.model';
 export class TrendsComponent implements OnInit {
   statsService = inject(StatsService);
 
-  // Värviskeemid graafikutele
-  colorScheme = {
-    domain: ['#2563eb', '#7c3aed', '#db2777', '#ea580c', '#16a34a', '#0891b2', '#4f46e5', '#be123c', '#15803d', '#0369a1']
-  };
+  // Värviskeemid graafikutele (kasutame eeldefineeritud skeemi)
+  colorScheme = 'vivid';
 
   // Valitud oskus palgastatistika jaoks
   selectedSkill = '';

@@ -230,10 +230,8 @@ import { StatsService } from '../../services/stats.service';
 export class DashboardComponent implements OnInit {
   statsService = inject(StatsService);
 
-  // Värviskeemid graafikutele
-  colorScheme = {
-    domain: ['#2563eb', '#3b82f6', '#60a5fa', '#93c5fd', '#bfdbfe']
-  };
+  // Värviskeemid graafikutele (kasutame eeldefineeritud skeemi)
+  colorScheme = 'cool';
 
   // Graafiku andmed
   trendsChartData: any[] = [];
