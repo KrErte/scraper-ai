@@ -6,7 +6,7 @@ WORKDIR /app
 
 # Kopeeri package failid ja installi sõltuvused
 COPY package*.json ./
-RUN npm install
+RUN npm install --legacy-peer-deps
 
 # Kopeeri lähtekood ja ehita
 COPY . .
