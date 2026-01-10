@@ -6,7 +6,7 @@ WORKDIR /app
 
 # Kopeeri package failid ja installi sõltuvused
 COPY package*.json ./
-RUN npm ci
+RUN npm install
 
 # Kopeeri lähtekood ja ehita
 COPY . .
