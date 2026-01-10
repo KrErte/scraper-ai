@@ -4,15 +4,26 @@ spring:
   application:
     name: jobs-aggregator
 
+  # Vaikimisi H2 andmebaas (arenduseks)
+  datasource:
+    url: jdbc:h2:mem:jobsdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+
   # JPA seaded
   jpa:
     hibernate:
-      ddl-auto: update
-    show-sql: false
+      ddl-auto: create-drop
+    show-sql: true
     properties:
       hibernate:
         format_sql: true
-        dialect: org.hibernate.dialect.PostgreSQLDialect
 
   # Jackson JSON seaded
   jackson:
