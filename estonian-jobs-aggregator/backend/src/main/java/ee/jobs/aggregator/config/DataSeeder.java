@@ -28,23 +28,15 @@ public class DataSeeder {
             CompanyRepository companyRepo
     ) {
         return args -> {
-            if (jobRepo.count() > 0) {
-                log.info("Andmebaasis on juba andmed, jätan seedimise vahele");
-                return;
+            // Loo ainult oskused, kui neid veel pole
+            // Tööpakkumised tulevad päris scrapingust
+            if (skillRepo.count() == 0) {
+                log.info("Laadin oskuste andmed...");
+                createSkills(skillRepo);
+                log.info("Oskused laetud! Tööpakkumised tuleb scrapida: POST /api/scraper/trigger");
+            } else {
+                log.info("Oskused on juba olemas, jätan vahele");
             }
-
-            log.info("Laadin mock andmed...");
-
-            // Loo oskused
-            Map<String, Skill> skills = createSkills(skillRepo);
-
-            // Loo ettevõtted
-            List<Company> companies = createCompanies(companyRepo);
-
-            // Loo tööpakkumised
-            createJobPostings(jobRepo, skills, companies);
-
-            log.info("Mock andmed laetud!");
         };
     }
 

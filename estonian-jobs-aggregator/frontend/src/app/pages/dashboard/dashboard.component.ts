@@ -1,9 +1,10 @@
-import { Component, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { NgxChartsModule } from '@swimlane/ngx-charts';
 
 import { StatsService } from '../../services/stats.service';
+import { ScraperService } from '../../services/scraper.service';
 
 /**
  * Dashboard komponent.
@@ -104,6 +105,41 @@ import { StatsService } from '../../services/stats.service';
             </ngx-charts-bar-horizontal>
           } @else {
             <div class="empty-chart">Andmed puuduvad</div>
+          }
+        </div>
+      </div>
+
+      <!-- Scraper nupp -->
+      <div class="scraper-section card">
+        <div class="card-header">
+          <h2 class="card-title">Tööpakkumiste uuendamine</h2>
+        </div>
+        <div class="scraper-content">
+          <p class="scraper-info">Tõmba värsked tööpakkumised CV.ee ja CV Keskus portaalidest.</p>
+
+          @if (scraperService.scraping()) {
+            <div class="scraping-status">
+              <div class="spinner"></div>
+              <span>Tõmban andmeid...</span>
+            </div>
+          } @else {
+            <button class="btn btn-primary" (click)="triggerScraper()">
+              Tõmba tööpakkumised
+            </button>
+          }
+
+          @if (scraperService.lastResult(); as result) {
+            <div class="scraper-result">
+              <span class="result-item success">{{ result.summary.totalNew }} uut</span>
+              <span class="result-item update">{{ result.summary.totalUpdated }} uuendatud</span>
+              @if (result.summary.totalErrors > 0) {
+                <span class="result-item error">{{ result.summary.totalErrors }} viga</span>
+              }
+            </div>
+          }
+
+          @if (scraperService.error(); as error) {
+            <div class="scraper-error">{{ error }}</div>
           }
         </div>
       </div>
@@ -225,10 +261,73 @@ import { StatsService } from '../../services/stats.service';
       gap: 1rem;
       padding: 3rem;
     }
+
+    .scraper-section {
+      margin-bottom: 1rem;
+    }
+
+    .scraper-content {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      align-items: flex-start;
+    }
+
+    .scraper-info {
+      color: var(--text-secondary);
+      margin: 0;
+    }
+
+    .scraping-status {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      color: var(--text-accent);
+    }
+
+    .scraping-status .spinner {
+      width: 1.5rem;
+      height: 1.5rem;
+    }
+
+    .scraper-result {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .result-item {
+      padding: 0.5rem 1rem;
+      border-radius: var(--border-radius-sm);
+      font-weight: 500;
+      font-size: 0.875rem;
+    }
+
+    .result-item.success {
+      background: rgba(56, 239, 125, 0.15);
+      color: #38ef7d;
+    }
+
+    .result-item.update {
+      background: rgba(102, 126, 234, 0.15);
+      color: #8b9cf4;
+    }
+
+    .result-item.error {
+      background: rgba(245, 87, 108, 0.15);
+      color: #f5576c;
+    }
+
+    .scraper-error {
+      color: #f5576c;
+      font-size: 0.875rem;
+    }
   `]
 })
 export class DashboardComponent implements OnInit {
   statsService = inject(StatsService);
+  scraperService = inject(ScraperService);
+  private cdr = inject(ChangeDetectorRef);
 
   // Värviskeemid graafikutele (kasutame eeldefineeritud skeemi)
   colorScheme = 'cool';
@@ -239,6 +338,16 @@ export class DashboardComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadData();
+  }
+
+  triggerScraper(): void {
+    this.scraperService.triggerAllScrapers().subscribe(result => {
+      if (result) {
+        // Laadi andmed uuesti peale scrapingut
+        this.loadData();
+      }
+      this.cdr.markForCheck();
+    });
   }
 
   private loadData(): void {
@@ -261,6 +370,8 @@ export class DashboardComponent implements OnInit {
           value: s.jobCount
         }));
       }
+
+      this.cdr.markForCheck();
     });
   }
 }

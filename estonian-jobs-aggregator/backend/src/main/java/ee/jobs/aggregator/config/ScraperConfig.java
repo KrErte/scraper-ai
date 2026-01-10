@@ -23,6 +23,9 @@ public class ScraperConfig {
     // CV.ee IT kategooria URL
     private String cvEeUrl = "https://www.cv.ee/toopakkumised/info-ja-telekommunikatsioonitehnoloogia";
 
+    // CV Keskus IT kategooria URL
+    private String cvKeskusUrl = "https://www.cvkeskus.ee/toopakkumised/it-arendus-it-haldus";
+
     // Getters ja setters
 
     public boolean isEnabled() {
@@ -55,5 +58,13 @@ public class ScraperConfig {
 
     public void setCvEeUrl(String cvEeUrl) {
         this.cvEeUrl = cvEeUrl;
+    }
+
+    public String getCvKeskusUrl() {
+        return cvKeskusUrl;
+    }
+
+    public void setCvKeskusUrl(String cvKeskusUrl) {
+        this.cvKeskusUrl = cvKeskusUrl;
     }
 }

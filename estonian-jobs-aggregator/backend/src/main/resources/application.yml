@@ -51,6 +51,8 @@ scraper:
   cron: "0 0 */6 * * *"
   # CV.ee IT kategooria URL
   cv-ee-url: https://www.cv.ee/toopakkumised/info-ja-telekommunikatsioonitehnoloogia
+  # CV Keskus IT kategooria URL
+  cv-keskus-url: https://www.cvkeskus.ee/toopakkumised/it-arendus-it-haldus
 
 # Logimine
 logging:
@@ -89,9 +91,9 @@ logging:
     ee.jobs.aggregator: DEBUG
     org.springframework.web: DEBUG
 
-# Scraper keelatud arenduses vaikimisi
+# Scraper lubatud - manuaalne käivitamine POST /api/scraper/trigger
 scraper:
-  enabled: false
+  enabled: true
 
 ---
 # Tootmiskeskkonna profiil
