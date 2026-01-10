@@ -1,0 +1,35 @@
+# Compiled files
+*.class
+*.jar
+*.war
+
+# IDE files
+.idea/
+*.iml
+.vscode/
+*.swp
+
+# Build outputs
+target/
+dist/
+node_modules/
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Logs
+*.log
+logs/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Angular
+.angular/
+
+# Maven
+.mvn/
+!/.mvn/wrapper/maven-wrapper.jar

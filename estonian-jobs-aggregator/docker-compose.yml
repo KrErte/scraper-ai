@@ -1,0 +1,54 @@
+# Estonian Tech Jobs Aggregator - Docker Compose konfiguratsioon
+# Sisaldab PostgreSQL andmebaasi, Spring Boot backend-i ja Angular frontend-i
+
+services:
+  # PostgreSQL andmebaas
+  db:
+    image: postgres:16
+    container_name: jobs-db
+    environment:
+      POSTGRES_DB: jobsdb
+      POSTGRES_USER: jobs
+      POSTGRES_PASSWORD: jobs123
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U jobs -d jobsdb"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Spring Boot backend
+  backend:
+    build: ./backend
+    container_name: jobs-backend
+    ports:
+      - "8080:8080"
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/jobsdb
+      SPRING_DATASOURCE_USERNAME: jobs
+      SPRING_DATASOURCE_PASSWORD: jobs123
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Angular frontend (nginx serves static files)
+  frontend:
+    build: ./frontend
+    container_name: jobs-frontend
+    ports:
+      - "4200:80"
+    depends_on:
+      - backend
+
+volumes:
+  pgdata:
+    driver: local
