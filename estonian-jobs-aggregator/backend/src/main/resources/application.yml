@@ -1,0 +1,106 @@
+# Eesti IT tööpakkumiste agregaatori konfiguratsioon
+
+spring:
+  application:
+    name: jobs-aggregator
+
+  # JPA seaded
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+
+  # Jackson JSON seaded
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
+    default-property-inclusion: non_null
+
+# Serveri seaded
+server:
+  port: 8080
+
+# Actuator seaded
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+
+# Scraperi seaded
+scraper:
+  enabled: true
+  # Rate limiting: millisekundid päringute vahel
+  rate-limit-ms: 2000
+  # Cron: iga 6 tunni tagant
+  cron: "0 0 */6 * * *"
+  # CV.ee IT kategooria URL
+  cv-ee-url: https://www.cv.ee/toopakkumised/info-ja-telekommunikatsioonitehnoloogia
+
+# Logimine
+logging:
+  level:
+    ee.jobs.aggregator: INFO
+    org.springframework.web: INFO
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+
+---
+# Arenduskeskkonna profiil
+spring:
+  config:
+    activate:
+      on-profile: dev
+
+  # H2 in-memory andmebaas arenduseks
+  datasource:
+    url: jdbc:h2:mem:jobsdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: true
+
+logging:
+  level:
+    ee.jobs.aggregator: DEBUG
+    org.springframework.web: DEBUG
+
+# Scraper keelatud arenduses vaikimisi
+scraper:
+  enabled: false
+
+---
+# Tootmiskeskkonna profiil
+spring:
+  config:
+    activate:
+      on-profile: prod
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/jobsdb
+    username: jobs
+    password: jobs123
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+
+logging:
+  level:
+    ee.jobs.aggregator: INFO
+    org.springframework.web: WARN
