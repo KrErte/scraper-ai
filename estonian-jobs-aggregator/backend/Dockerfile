@@ -1,16 +1,16 @@
-# Multi-stage build Java 21 rakenduse jaoks
+# Multi-stage build Java 21 rakenduse jaoks (Gradle)
 
 # Build stage
-FROM maven:3.9-eclipse-temurin-21 AS build
+FROM gradle:8.5-jdk21 AS build
 WORKDIR /app
 
-# Kopeeri pom.xml ja lae sõltuvused (cache layer)
-COPY pom.xml .
-RUN mvn dependency:go-offline -B
+# Kopeeri Gradle failid ja lae sõltuvused (cache layer)
+COPY build.gradle settings.gradle ./
+RUN gradle dependencies --no-daemon || true
 
 # Kopeeri lähtekood ja ehita
 COPY src ./src
-RUN mvn package -DskipTests -B
+RUN gradle bootJar --no-daemon -x test
 
 # Runtime stage
 FROM eclipse-temurin:21-jre-alpine
@@ -21,7 +21,7 @@ RUN addgroup -g 1001 -S appgroup && \
     adduser -u 1001 -S appuser -G appgroup
 
 # Kopeeri JAR fail
-COPY --from=build /app/target/*.jar app.jar
+COPY --from=build /app/build/libs/*.jar app.jar
 
 # Muuda omanik
 RUN chown -R appuser:appgroup /app
