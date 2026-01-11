@@ -50,9 +50,9 @@ scraper:
   # Cron: iga 6 tunni tagant
   cron: "0 0 */6 * * *"
   # CV.ee IT kategooria URL
-  cv-ee-url: https://www.cv.ee/toopakkumised/info-ja-telekommunikatsioonitehnoloogia
+  cv-ee-url: https://www.cv.ee/en/search?categories%5B0%5D=INFORMATION_TECHNOLOGY
   # CV Keskus IT kategooria URL
-  cv-keskus-url: https://www.cvkeskus.ee/toopakkumised/it-arendus-it-haldus
+  cv-keskus-url: https://www.cvkeskus.ee/toopakkumised-infotehnoloogia-valdkonnas
 
 # Logimine
 logging:

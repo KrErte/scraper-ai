@@ -21,10 +21,10 @@ public class ScraperConfig {
     private String cron = "0 0 */6 * * *";
 
     // CV.ee IT kategooria URL
-    private String cvEeUrl = "https://www.cv.ee/toopakkumised/info-ja-telekommunikatsioonitehnoloogia";
+    private String cvEeUrl = "https://www.cv.ee/en/search?categories%5B0%5D=INFORMATION_TECHNOLOGY";
 
     // CV Keskus IT kategooria URL
-    private String cvKeskusUrl = "https://www.cvkeskus.ee/toopakkumised/it-arendus-it-haldus";
+    private String cvKeskusUrl = "https://www.cvkeskus.ee/toopakkumised-infotehnoloogia-valdkonnas";
 
     // Getters ja setters
 

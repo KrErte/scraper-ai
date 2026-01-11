@@ -138,7 +138,8 @@ public class CvKeskusScraper {
         int maxPages = 10;
 
         while (page <= maxPages) {
-            String url = page == 1 ? baseUrl : baseUrl + "?page=" + page;
+            // CV Keskus kasutab /page/X formaati leheküljenduseks
+            String url = page == 1 ? baseUrl : baseUrl + "/page/" + page;
             log.debug("CV Keskus laadimine: {}", url);
 
             try {
@@ -148,17 +149,17 @@ public class CvKeskusScraper {
                         .followRedirects(true)
                         .get();
 
-                // CV Keskus kuulutuste selektorid
-                Elements listings = doc.select("a.vacancyListItem, div.vacancy-item a, a[href*='/toopakkumine/']");
+                // CV Keskus kuulutuste selektorid - otsime tööpakkumiste linke
+                Elements listings = doc.select("a[href*='/toopakkumine/'], a[href*='/vacancy/']");
 
                 if (listings.isEmpty()) {
-                    // Proovi alternatiivset selektorit
-                    listings = doc.select(".job-list a[href*='vacancy'], .vacancy a[href]");
+                    // Proovi alternatiivset selektorit - CV Keskus kasutab tihti selliseid klasse
+                    listings = doc.select(".vacancy-item a, .job-item a, article a[href*='cvkeskus']");
                 }
 
                 if (listings.isEmpty()) {
-                    // Veel üks alternatiiv
-                    listings = doc.select("a[href*='/job/'], a[href*='/toopakkumised/']");
+                    // Veel üks alternatiiv - leia kõik lingid mis viitavad tööpakkumisele
+                    listings = doc.select("a[href*='cvkeskus.ee'][href*='pakkumine'], .vacancies a");
                 }
 
                 if (listings.isEmpty()) {
@@ -169,9 +170,9 @@ public class CvKeskusScraper {
                 for (Element listing : listings) {
                     String href = listing.attr("abs:href");
                     if (href != null && !href.isEmpty()
-                        && href.contains("cvkeskus")
-                        && !jobUrls.contains(href)
-                        && !href.contains("?")) {
+                        && href.contains("cvkeskus.ee")
+                        && (href.contains("/toopakkumine/") || href.contains("/vacancy/"))
+                        && !jobUrls.contains(href)) {
                         jobUrls.add(href);
                     }
                 }

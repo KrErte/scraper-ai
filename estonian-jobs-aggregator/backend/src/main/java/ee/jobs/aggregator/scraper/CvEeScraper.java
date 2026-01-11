@@ -149,21 +149,28 @@ public class CvEeScraper {
         int maxPages = 10; // Piira lehekülgede arvu
 
         while (page <= maxPages) {
-            String url = page == 1 ? baseUrl : baseUrl + "?page=" + page;
+            // CV.ee kasutab &page= parameetrit otsingu URL-is
+            String url = page == 1 ? baseUrl : baseUrl + "&page=" + page;
             log.debug("Laadimine: {}", url);
 
             try {
                 Document doc = Jsoup.connect(url)
                         .userAgent(USER_AGENT)
                         .timeout(30000)
+                        .followRedirects(true)
                         .get();
 
-                // Otsi kuulutuste linke (CV.ee struktuur võib muutuda)
-                Elements listings = doc.select("a.job-list-item, a[href*='/job/'], div.vacancy-item a");
+                // CV.ee otsingutulemuste selektorid
+                Elements listings = doc.select("a[href*='/vacancy/'], a[href*='/job/'], a.vacancy-item");
 
                 if (listings.isEmpty()) {
                     // Proovi alternatiivset selektorit
-                    listings = doc.select("a[href*='toopakkumine']");
+                    listings = doc.select("div[data-cy='vacancies-list'] a, .search-result a[href*='vacancy']");
+                }
+
+                if (listings.isEmpty()) {
+                    // Veel üks alternatiiv
+                    listings = doc.select("a[href*='/en/vacancy/'], a[href*='/et/vacancy/']");
                 }
 
                 if (listings.isEmpty()) {
@@ -173,7 +180,9 @@ public class CvEeScraper {
 
                 for (Element listing : listings) {
                     String href = listing.attr("abs:href");
-                    if (href != null && !href.isEmpty() && !jobUrls.contains(href)) {
+                    if (href != null && !href.isEmpty()
+                        && (href.contains("/vacancy/") || href.contains("/job/"))
+                        && !jobUrls.contains(href)) {
                         jobUrls.add(href);
                     }
                 }
