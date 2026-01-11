@@ -34,7 +34,11 @@ public class CvKeskusScraper {
 
     private static final Logger log = LoggerFactory.getLogger(CvKeskusScraper.class);
 
-    private static final String USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36";
+    private static final String USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36";
+
+    // Täiendavad HTTP päised, mis aitavad vältida blokeerimist
+    private static final String ACCEPT = "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8";
+    private static final String ACCEPT_LANGUAGE = "et-EE,et;q=0.9,en-US;q=0.8,en;q=0.7";
 
     private static final Pattern SALARY_PATTERN = Pattern.compile(
         "(\\d+[\\s,]?\\d*)\\s*[-–]\\s*(\\d+[\\s,]?\\d*)\\s*(€|EUR)?",
@@ -145,9 +149,15 @@ public class CvKeskusScraper {
             try {
                 Document doc = Jsoup.connect(url)
                         .userAgent(USER_AGENT)
+                        .header("Accept", ACCEPT)
+                        .header("Accept-Language", ACCEPT_LANGUAGE)
+                        .header("Cache-Control", "no-cache")
                         .timeout(30000)
                         .followRedirects(true)
                         .get();
+
+                // Debug: logi lehe pealkiri, et kontrollida kas leht laeti
+                log.info("CV Keskus lehe pealkiri: {}", doc.title());
 
                 // Debug: logi kõik leitud lingid
                 Elements allLinks = doc.select("a[href]");
