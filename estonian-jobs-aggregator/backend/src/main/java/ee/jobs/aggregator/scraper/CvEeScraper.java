@@ -151,7 +151,7 @@ public class CvEeScraper {
         while (page <= maxPages) {
             // CV.ee kasutab &page= parameetrit otsingu URL-is
             String url = page == 1 ? baseUrl : baseUrl + "&page=" + page;
-            log.debug("Laadimine: {}", url);
+            log.info("CV.ee laadimine: {}", url);
 
             try {
                 Document doc = Jsoup.connect(url)
@@ -160,30 +160,41 @@ public class CvEeScraper {
                         .followRedirects(true)
                         .get();
 
+                // Debug: logi kõik leitud lingid
+                Elements allLinks = doc.select("a[href]");
+                log.info("CV.ee: lehel {} leiti {} linki kokku", page, allLinks.size());
+
                 // CV.ee otsingutulemuste selektorid
-                Elements listings = doc.select("a[href*='/vacancy/'], a[href*='/job/'], a.vacancy-item");
+                Elements listings = doc.select("a[href*='/vacancy/'], a[href*='/job/']");
+                log.info("CV.ee: /vacancy/ või /job/ linke: {}", listings.size());
 
                 if (listings.isEmpty()) {
                     // Proovi alternatiivset selektorit
-                    listings = doc.select("div[data-cy='vacancies-list'] a, .search-result a[href*='vacancy']");
+                    listings = doc.select("a[href*='offer']");
+                    log.info("CV.ee: offer linke: {}", listings.size());
                 }
 
                 if (listings.isEmpty()) {
-                    // Veel üks alternatiiv
-                    listings = doc.select("a[href*='/en/vacancy/'], a[href*='/et/vacancy/']");
-                }
-
-                if (listings.isEmpty()) {
-                    log.debug("Lehel {} pole rohkem kuulutusi", page);
+                    // Logi mõned näidislingid debug jaoks
+                    int count = 0;
+                    for (Element link : allLinks) {
+                        String href = link.attr("href");
+                        if (href.startsWith("/") && !href.contains("login") && !href.contains("register") && count < 10) {
+                            log.info("CV.ee näidislink: {}", href);
+                            count++;
+                        }
+                    }
+                    log.info("CV.ee lehel {} pole rohkem kuulutusi", page);
                     break;
                 }
 
                 for (Element listing : listings) {
                     String href = listing.attr("abs:href");
                     if (href != null && !href.isEmpty()
-                        && (href.contains("/vacancy/") || href.contains("/job/"))
+                        && (href.contains("/vacancy/") || href.contains("/job/") || href.contains("/offer/"))
                         && !jobUrls.contains(href)) {
                         jobUrls.add(href);
+                        log.debug("CV.ee lisatud: {}", href);
                     }
                 }
 

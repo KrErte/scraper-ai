@@ -140,7 +140,7 @@ public class CvKeskusScraper {
         while (page <= maxPages) {
             // CV Keskus kasutab /page/X formaati leheküljenduseks
             String url = page == 1 ? baseUrl : baseUrl + "/page/" + page;
-            log.debug("CV Keskus laadimine: {}", url);
+            log.info("CV Keskus laadimine: {}", url);
 
             try {
                 Document doc = Jsoup.connect(url)
@@ -149,31 +149,39 @@ public class CvKeskusScraper {
                         .followRedirects(true)
                         .get();
 
-                // CV Keskus kuulutuste selektorid - otsime tööpakkumiste linke
-                Elements listings = doc.select("a[href*='/toopakkumine/'], a[href*='/vacancy/']");
+                // Debug: logi kõik leitud lingid
+                Elements allLinks = doc.select("a[href]");
+                log.info("CV Keskus: lehel {} leiti {} linki kokku", page, allLinks.size());
+
+                // Leia kõik tööpakkumiste lingid - cvkeskus kasutab /tookoht/ URL-i
+                Elements listings = doc.select("a[href*='/tookoht/']");
+                log.info("CV Keskus: /tookoht/ linke: {}", listings.size());
 
                 if (listings.isEmpty()) {
-                    // Proovi alternatiivset selektorit - CV Keskus kasutab tihti selliseid klasse
-                    listings = doc.select(".vacancy-item a, .job-item a, article a[href*='cvkeskus']");
+                    // Proovi teisi variante
+                    listings = doc.select("a[href*='/toopakkumine/'], a[href*='/vacancy/']");
+                    log.info("CV Keskus: /toopakkumine/ või /vacancy/ linke: {}", listings.size());
                 }
 
                 if (listings.isEmpty()) {
-                    // Veel üks alternatiiv - leia kõik lingid mis viitavad tööpakkumisele
-                    listings = doc.select("a[href*='cvkeskus.ee'][href*='pakkumine'], .vacancies a");
-                }
-
-                if (listings.isEmpty()) {
-                    log.debug("CV Keskus lehel {} pole rohkem kuulutusi", page);
+                    // Logi mõned näidislingid debug jaoks
+                    int count = 0;
+                    for (Element link : allLinks) {
+                        String href = link.attr("href");
+                        if (href.contains("cvkeskus") && count < 10) {
+                            log.info("CV Keskus näidislink: {}", href);
+                            count++;
+                        }
+                    }
+                    log.info("CV Keskus lehel {} pole rohkem kuulutusi", page);
                     break;
                 }
 
                 for (Element listing : listings) {
                     String href = listing.attr("abs:href");
-                    if (href != null && !href.isEmpty()
-                        && href.contains("cvkeskus.ee")
-                        && (href.contains("/toopakkumine/") || href.contains("/vacancy/"))
-                        && !jobUrls.contains(href)) {
+                    if (href != null && !href.isEmpty() && !jobUrls.contains(href)) {
                         jobUrls.add(href);
+                        log.debug("CV Keskus lisatud: {}", href);
                     }
                 }
 
